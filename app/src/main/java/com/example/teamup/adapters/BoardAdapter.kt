@@ -20,7 +20,8 @@ class BoardAdapter : RecyclerView.Adapter<BoardAdapter.BoardViewHolder>() {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BoardViewHolder {
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_board, parent, false)
+        val itemView =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_board, parent, false)
         return BoardViewHolder(itemView)
     }
 
@@ -39,7 +40,8 @@ class BoardAdapter : RecyclerView.Adapter<BoardAdapter.BoardViewHolder>() {
             titleTextView.text = board.title
 
             val cardAdapter = CardAdapter()
-            cardRecyclerView.layoutManager = LinearLayoutManager(itemView.context)
+            cardRecyclerView.layoutManager =
+                LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
             cardRecyclerView.adapter = cardAdapter
             cardAdapter.submitList(board.cards)
         }

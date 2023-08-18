@@ -39,7 +39,7 @@ class CardAdapter : RecyclerView.Adapter<CardAdapter.CardViewHolder>() {
             titleTextView.text = card.title
 
             val listAdapter = ListAdapter()
-            listRecyclerView.layoutManager = LinearLayoutManager(itemView.context)
+            listRecyclerView.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
             listRecyclerView.adapter = listAdapter
             listAdapter.submitList(card.lists)
         }

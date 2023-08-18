@@ -5,6 +5,7 @@ import com.example.teamup.dataclasses.UpdateCardRequest
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.DELETE
+import retrofit2.http.Header
 import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -16,22 +17,22 @@ interface CardApi {
         "accept-encoding: gzip, deflate, br",
         "content-type: application/json",
     )
-    @POST("/createCard")
-    fun createCard(@Body request: CreateCardRequest): Call<Void>
+    @POST("/api/v1/card")
+    fun createCard(@Header("Authorization") accessToken: String, @Body request: CreateCardRequest): Call<Void>
 
     @Headers(
         "accept: */*",
         "accept-encoding: gzip, deflate, br",
         "content-type: application/json",
     )
-    @PUT("/updateCard/{id}")
-    fun updateCard(@Path("id") id: Int, @Body request: UpdateCardRequest): Call<Void>
+    @PUT("/api/v1/card/{id}")
+    fun updateCard(@Header("Authorization") accessToken: String, @Path("id") id: Int, @Body request: UpdateCardRequest): Call<Void>
 
     @Headers(
         "accept: */*",
         "accept-encoding: gzip, deflate, br",
         "content-type: application/json",
     )
-    @DELETE("/deleteCard/{id}")
-    fun deleteCard(@Path("id") id: Int): Call<Void>
+    @DELETE("/api/v1/card/{id}")
+    fun deleteCard(@Header("Authorization") accessToken: String, @Path("id") id: Int): Call<Void>
 }

@@ -19,24 +19,23 @@ class ListAdapter : RecyclerView.Adapter<ListAdapter.ListViewHolder>() {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListViewHolder {
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.list_item, parent, false)
+        val itemView =
+            LayoutInflater.from(parent.context).inflate(R.layout.list_item, parent, false)
         return ListViewHolder(itemView)
     }
 
     override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
-        val list = listList[position]
-        holder.bind(list)
+        val listItem = listList[position]
+        holder.bind(listItem)
     }
 
     override fun getItemCount(): Int = listList.size
 
     inner class ListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val titleTextView: TextView = itemView.findViewById(R.id.et_task_list_name)
-        // Bind your list data here
 
-        fun bind(list: Lists) {
-            titleTextView.text = list.title
-            // Bind other data as needed
+        fun bind(listItem: Lists) {
+            titleTextView.text = listItem.title
         }
     }
 }

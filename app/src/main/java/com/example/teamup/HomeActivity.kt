@@ -65,7 +65,7 @@ class HomeActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val workspaceList = response.body()
                     workspaceList?.let {
-                        workspaceAdapter.submitList(workspaceList) // Update the adapter with workspaceList
+                        workspaceAdapter.submitList(workspaceList)
                     }
                 } else {
                     Log.e(TAG, "API error: ${response.code()}")

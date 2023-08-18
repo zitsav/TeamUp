@@ -4,24 +4,12 @@
     android:layout_height="wrap_content"
     android:padding="16dp">
 
-    <TextView
-        android:id="@+id/dialogTitle2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Create New:"
-        android:textSize="18sp"
-        android:textColor="@android:color/black"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="16dp"
-        android:textAlignment="center"/>
-
     <EditText
         android:id="@+id/inputName2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Enter Title"
         android:inputType="text"
-        android:layout_below="@id/dialogTitle2"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="8dp"
         android:layout_marginStart="16dp"
@@ -38,25 +26,5 @@
         android:layout_marginTop="8dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"/>
-
-    <Button
-        android:id="@+id/createButton2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Create"
-        android:layout_below="@id/inputDescription2"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
-        android:backgroundTint="@color/button_background_color"/>
-
-    <Button
-        android:id="@+id/cancelButton2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Cancel"
-        android:layout_below="@id/createButton2"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="8dp"
-        android:textColor="@android:color/darker_gray"/>
 
 </RelativeLayout>

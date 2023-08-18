@@ -11,8 +11,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.teamup.adapters.BoardAdapter
 import com.example.teamup.dataclasses.CreateBoardRequest
+import com.example.teamup.dataclasses.CreateCardRequest
+import com.example.teamup.dataclasses.CreateListRequest
 import com.example.teamup.dataclasses.Workspace
 import com.example.teamup.interfaces.BoardApi
+import com.example.teamup.interfaces.CardApi
+import com.example.teamup.interfaces.ListApi
 import com.example.teamup.interfaces.WorkspaceApi
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import retrofit2.Call
@@ -23,6 +27,8 @@ class WorkspaceActivity : AppCompatActivity() {
 
     private lateinit var workspaceApi: WorkspaceApi
     private lateinit var boardApi: BoardApi
+    private lateinit var cardApi: CardApi
+    private lateinit var listApi: ListApi
     private lateinit var recyclerViewBoards: RecyclerView
     private lateinit var fabCreateBoard: FloatingActionButton
     private lateinit var accessToken: String
@@ -35,6 +41,8 @@ class WorkspaceActivity : AppCompatActivity() {
 
         workspaceApi = RetrofitInstance.getRetrofitInstance().create(WorkspaceApi::class.java)
         boardApi = RetrofitInstance.getRetrofitInstance().create(BoardApi::class.java)
+        cardApi = RetrofitInstance.getRetrofitInstance().create(CardApi::class.java)
+        listApi = RetrofitInstance.getRetrofitInstance().create(ListApi::class.java)
         recyclerViewBoards = findViewById(R.id.recycler_view_boards)
         fabCreateBoard = findViewById(R.id.fab_create_board)
 
@@ -42,11 +50,10 @@ class WorkspaceActivity : AppCompatActivity() {
         accessToken = sharedPreferences.getString("AuthToken", "") ?: ""
         authToken = "Bearer $accessToken"
 
-        // Get the workspaceId from the Intent extras
         workspaceId = intent.getIntExtra("workspaceId", -1)
 
         val boardAdapter = BoardAdapter()
-        recyclerViewBoards.layoutManager = LinearLayoutManager(this)
+        recyclerViewBoards.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         recyclerViewBoards.adapter = boardAdapter
 
         fetchWorkspaceData()
@@ -108,6 +115,58 @@ class WorkspaceActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    private fun showCreateCardDialog(boardId: Int) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.create_board, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setTitle("Create New Card")
+            .setPositiveButton("Create") { _, _ ->
+                val titleEditText = dialogView.findViewById<EditText>(R.id.inputName2)
+                val descriptionEditText = dialogView.findViewById<EditText>(R.id.inputDescription2)
+
+                val title = titleEditText.text.toString().trim()
+                val description = descriptionEditText.text.toString().trim()
+
+                if (title.isNotEmpty()) {
+                    val createCardRequest = CreateCardRequest(boardId, description, title)
+                    createCard(createCardRequest)
+                } else {
+                    showToast("Please enter a card title")
+                }
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+
+        dialog.show()
+    }
+
+    private fun showCreateListDialog(cardId: Int) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.create_workspace, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setTitle("Create New List")
+            .setPositiveButton("Create") { _, _ ->
+                val titleEditText = dialogView.findViewById<EditText>(R.id.inputName)
+
+                val title = titleEditText.text.toString().trim()
+
+                if (title.isNotEmpty()) {
+                    val createListRequest = CreateListRequest(cardId, title)
+                    createList(createListRequest)
+                } else {
+                    showToast("Please enter a list title")
+                }
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+
+        dialog.show()
+    }
+
     private fun createBoard(createBoardRequest: CreateBoardRequest) {
         boardApi.createBoard(authToken, createBoardRequest).enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
@@ -117,6 +176,44 @@ class WorkspaceActivity : AppCompatActivity() {
                 } else {
                     Log.e(TAG, "API error: ${response.code()}")
                     showToast("Error creating board")
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Log.e(TAG, "Network error: ${t.message}")
+                showToast("Network error. Please try again.")
+            }
+        })
+    }
+
+    private fun createCard(createCardRequest: CreateCardRequest) {
+        cardApi.createCard(authToken, createCardRequest).enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    showToast("Card created successfully")
+                    fetchWorkspaceData()
+                } else {
+                    Log.e(TAG, "API error: ${response.code()}")
+                    showToast("Error creating card")
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Log.e(TAG, "Network error: ${t.message}")
+                showToast("Network error. Please try again.")
+            }
+        })
+    }
+
+    private fun createList(createListRequest: CreateListRequest) {
+        listApi.createList(authToken, createListRequest).enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    showToast("List created successfully")
+                    fetchWorkspaceData()
+                } else {
+                    Log.e(TAG, "API error: ${response.code()}")
+                    showToast("Error creating list")
                 }
             }
 
