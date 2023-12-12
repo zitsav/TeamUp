@@ -1,5 +1,6 @@
 package com.example.teamup.adapters
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,34 +9,26 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.teamup.R
 import com.example.teamup.dataclasses.Lists
 
-class ListAdapter : RecyclerView.Adapter<ListAdapter.ListViewHolder>() {
-
-    private val listList: MutableList<Lists> = mutableListOf()
-
-    fun submitList(newList: List<Lists>) {
-        listList.clear()
-        listList.addAll(newList)
-        notifyDataSetChanged()
-    }
+class ListAdapter(
+    private val context: Context,
+    private val listItems: ArrayList<Lists>,
+) : RecyclerView.Adapter<ListAdapter.ListViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListViewHolder {
-        val itemView =
-            LayoutInflater.from(parent.context).inflate(R.layout.list_item, parent, false)
+        val itemView = LayoutInflater.from(context).inflate(R.layout.list_item, parent, false)
         return ListViewHolder(itemView)
     }
 
     override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
-        val listItem = listList[position]
-        holder.bind(listItem)
+        val currentListItem = listItems[position]
+        holder.listTitleTextView.text = currentListItem.title
     }
 
-    override fun getItemCount(): Int = listList.size
+    override fun getItemCount(): Int {
+        return listItems.size
+    }
 
     inner class ListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val titleTextView: TextView = itemView.findViewById(R.id.et_task_list_name)
-
-        fun bind(listItem: Lists) {
-            titleTextView.text = listItem.title
-        }
+        val listTitleTextView: TextView = itemView.findViewById(R.id.et_task_list_name)
     }
 }
