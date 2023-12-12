@@ -1,9 +1,12 @@
 package com.example.teamup
 
+import android.app.AlertDialog
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
+import android.widget.EditText
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,6 +35,7 @@ class WorkspaceActivity : AppCompatActivity(), BoardAdapter.OnClickListener {
     private lateinit var boardAdapter: BoardAdapter
     private lateinit var authToken: String
     private lateinit var workspaceApi: WorkspaceApi
+    private lateinit var boardApi: BoardApi
     private var workspaceId: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,13 +44,61 @@ class WorkspaceActivity : AppCompatActivity(), BoardAdapter.OnClickListener {
         recyclerView = findViewById(R.id.recycler_view_boards)
 
         workspaceApi = RetrofitInstance.getRetrofitInstance().create(WorkspaceApi::class.java)
+        boardApi = RetrofitInstance.getRetrofitInstance().create(BoardApi::class.java)
 
         val sharedPreferences: SharedPreferences = getSharedPreferences("AuthPrefs", MODE_PRIVATE)
         authToken = "Bearer ${sharedPreferences.getString("AuthToken", "")}"
 
         workspaceId = intent.getIntExtra("workspaceId", -1)
 
+        val fabCreateBoard: FloatingActionButton = findViewById(R.id.fab_create_board)
+        fabCreateBoard.setOnClickListener {
+            showCreateBoardDialog()
+        }
+
         fetchWorkspaceById(workspaceId)
+    }
+
+    private fun showCreateBoardDialog() {
+        val builder = AlertDialog.Builder(this)
+        val inflater = LayoutInflater.from(this)
+        val dialogView = inflater.inflate(R.layout.create_board, null)
+        builder.setView(dialogView)
+
+        val boardNameEditText: EditText = dialogView.findViewById(R.id.inputName2Board)
+
+        builder.setPositiveButton("Submit") { dialog, _ ->
+            val boardName = boardNameEditText.text.toString()
+            if (boardName.isNotEmpty()) {
+                val createBoardRequest = CreateBoardRequest("", boardName, workspaceId)
+                createBoard(createBoardRequest)
+            } else {
+                Toast.makeText(this, "Enter title", Toast.LENGTH_LONG).show()
+            }
+            dialog.dismiss()
+        }
+
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        val alertDialog = builder.create()
+        alertDialog.show()
+    }
+
+    private fun createBoard(request: CreateBoardRequest) {
+        val call: Call<Void> = boardApi.createBoard(authToken, request)
+
+        call.enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    fetchWorkspaceById(workspaceId)
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+            }
+        })
     }
 
     private fun fetchWorkspaceById(workspaceId: Int) {
@@ -64,7 +116,6 @@ class WorkspaceActivity : AppCompatActivity(), BoardAdapter.OnClickListener {
             }
 
             override fun onFailure(call: Call<Workspace>, t: Throwable) {
-                // Handle failure
             }
         })
     }
@@ -76,7 +127,5 @@ class WorkspaceActivity : AppCompatActivity(), BoardAdapter.OnClickListener {
     }
 
     override fun onClick(board: Board) {
-        // Handle item click if needed
-        // For example, you can open a new activity or fragment for the selected board
     }
 }

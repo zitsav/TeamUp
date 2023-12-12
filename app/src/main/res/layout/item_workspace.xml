@@ -40,4 +40,13 @@
         android:layout_toStartOf="@id/editWorkspaceImageView"
         android:layout_centerVertical="true"/>
 
+    <!-- Divider -->
+    <View
+        android:id="@+id/divider"
+        android:layout_marginTop="25dp"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/deleteWorkspaceImageView"
+        android:background="@color/material_dynamic_neutral70" />
+
 </RelativeLayout>

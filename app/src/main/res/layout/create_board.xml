@@ -5,23 +5,11 @@
     android:padding="16dp">
 
     <EditText
-        android:id="@+id/inputName2"
+        android:id="@+id/inputName2Board"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Enter Title"
         android:inputType="text"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"/>
-
-    <EditText
-        android:id="@+id/inputDescription2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Enter Description"
-        android:inputType="text"
-        android:layout_below="@id/inputName2"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="8dp"
         android:layout_marginStart="16dp"
