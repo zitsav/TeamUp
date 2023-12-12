@@ -26,6 +26,8 @@
                 android:layout_weight="1"
                 android:text="List Name"
                 android:padding="10dp"
+                android:textStyle="italic"
+                android:layout_marginLeft="15dp"
                 android:imeOptions="actionDone"
                 android:inputType="text" />
 

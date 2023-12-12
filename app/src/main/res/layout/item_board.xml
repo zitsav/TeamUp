@@ -43,7 +43,8 @@
                 android:gravity="center"
                 android:padding="8dp"
                 android:text="Add Card"
-                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:textColor="@color/cardview_light_background"
                 android:textSize="16sp"
                 android:visibility="visible" />
 

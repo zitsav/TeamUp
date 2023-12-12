@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:elevation="4dp"
-        app:cardBackgroundColor="@color/black"
+        app:cardBackgroundColor="@color/material_dynamic_neutral90"
         android:layout_margin="8dp"
         app:cardCornerRadius="4dp"
         android:orientation="vertical"
@@ -27,26 +27,27 @@
             <TextView
                 android:id="@+id/tv_card_title"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="wrap_content"
                 android:background="@color/off_white"
                 android:gravity="center"
-                android:padding="8dp"
                 android:text="Title"
+                android:padding="10dp"
                 android:textColor="@color/black"
-                android:textSize="25sp"
-                android:textStyle="bold"
+                android:textSize="20sp"
+                android:textFontWeight="@integer/material_motion_duration_long_2"
                 tools:visibility="visible" />
 
             <TextView
                 android:id="@+id/tv_add_task_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/off_white"
+                android:background="@color/button_background_color"
                 android:gravity="center"
                 android:padding="8dp"
                 android:text="Add List"
-                android:textColor="@color/black"
+                android:textColor="@color/cardview_light_background"
                 android:textSize="16sp"
+                android:textStyle="bold"
                 tools:visibility="visible" />
 
             <androidx.recyclerview.widget.RecyclerView
