@@ -1,11 +1,9 @@
 package com.example.teamup.dataclasses
 
 data class Board(
-    var cards: List<Card>,
-    val createdAt: String,
-    val description: String,
+    val cards: List<Card>,
     val id: Int,
+    val lastPosition: Int,
     val title: String,
-    val updatedAt: String,
     val workspaceId: Int
 )

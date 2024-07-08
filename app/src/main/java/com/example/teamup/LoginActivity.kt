@@ -5,9 +5,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
-import com.example.teamup.dataclasses.AuthTokenResponse
+import com.example.teamup.dataclasses.AuthResponse
 import com.example.teamup.dataclasses.LoginRequest
-import com.example.teamup.interfaces.AuthApi
+import com.example.teamup.network.AuthApi
+import com.example.teamup.network.RetrofitInstance
 import com.google.android.material.textfield.TextInputEditText
 import retrofit2.Call
 import retrofit2.Callback
@@ -16,7 +17,6 @@ import retrofit2.Response
 class LoginActivity : AppCompatActivity() {
     private lateinit var editEmail: TextInputEditText
     private lateinit var editPassword: TextInputEditText
-
     private lateinit var authApi: AuthApi
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,17 +27,17 @@ class LoginActivity : AppCompatActivity() {
         editPassword = findViewById(R.id.edit_text_password)
 
         val loginButton: Button = findViewById(R.id.btn_login)
-
         authApi = RetrofitInstance.getRetrofitInstance().create(AuthApi::class.java)
 
         loginButton.setOnClickListener {
             val email = editEmail.text.toString().trim()
             val password = editPassword.text.toString()
+            val fcmToken = getFcmToken()
 
-            val loginRequest = LoginRequest(email, password)
+            val loginRequest = LoginRequest(email, password, fcmToken)
 
-            authApi.login(loginRequest).enqueue(object : Callback<AuthTokenResponse> {
-                override fun onResponse(call: Call<AuthTokenResponse>, response: Response<AuthTokenResponse>) {
+            authApi.login(loginRequest).enqueue(object : Callback<AuthResponse> {
+                override fun onResponse(call: Call<AuthResponse>, response: Response<AuthResponse>) {
                     if (response.isSuccessful) {
                         val authToken = response.body()?.token
                         if (!authToken.isNullOrBlank()) {
@@ -56,7 +56,7 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
 
-                override fun onFailure(call: Call<AuthTokenResponse>, t: Throwable) {
+                override fun onFailure(call: Call<AuthResponse>, t: Throwable) {
                     showToast("An error occurred. Please try again later.")
                 }
             })
@@ -65,5 +65,10 @@ class LoginActivity : AppCompatActivity() {
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun getFcmToken(): String? {
+        //to be implemented
+        return ""
     }
 }

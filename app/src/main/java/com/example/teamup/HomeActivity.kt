@@ -10,12 +10,13 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.teamup.adapters.WorkspaceAdapter
+import com.example.teamup.databinding.ActivityHomeBinding
 import com.example.teamup.dataclasses.CreateWorkspaceRequest
-import com.example.teamup.dataclasses.GetAllWorkspaceResponseItem
-import com.example.teamup.interfaces.WorkspaceApi
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.example.teamup.dataclasses.GetAllWorkspaceResponse
+import com.example.teamup.dataclasses.MessageResponse
+import com.example.teamup.network.RetrofitInstance
+import com.example.teamup.network.WorkspaceApi
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -23,60 +24,52 @@ import retrofit2.Response
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var workspaceApi: WorkspaceApi
-    private lateinit var recyclerView: RecyclerView
     private lateinit var workspaceAdapter: WorkspaceAdapter
-    private lateinit var fabCreateBoard: FloatingActionButton
     private lateinit var accessToken: String
     private lateinit var authToken: String
-
+    private lateinit var binding: ActivityHomeBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_home)
+        binding = ActivityHomeBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         workspaceApi = RetrofitInstance.getRetrofitInstance().create(WorkspaceApi::class.java)
-        recyclerView = findViewById(R.id.recyclerView)
-        fabCreateBoard = findViewById(R.id.fab_create_board)
 
-        workspaceAdapter = WorkspaceAdapter { workspaceId ->
+        workspaceAdapter = WorkspaceAdapter(this) { workspaceId ->
             navigateToWorkspaceActivity(workspaceId)
         }
-        recyclerView.adapter = workspaceAdapter
+        binding.recyclerView.adapter = workspaceAdapter
 
         val sharedPreferences = getSharedPreferences("AuthPrefs", MODE_PRIVATE)
         accessToken = sharedPreferences.getString("AuthToken", "") ?: ""
         authToken = "Bearer $accessToken"
 
-        recyclerView.layoutManager = LinearLayoutManager(this) // Set a LinearLayoutManager
+        binding.recyclerView.layoutManager = LinearLayoutManager(this)
 
         fetchAllWorkspaces()
 
-        fabCreateBoard.setOnClickListener {
+        binding.fabCreateBoard.setOnClickListener {
             showCreateWorkspaceDialog()
         }
     }
 
     private fun fetchAllWorkspaces() {
-        workspaceApi.getAllWorkspaces(authToken).enqueue(object : Callback<List<GetAllWorkspaceResponseItem>> {
+        workspaceApi.getAllWorkspaces(authToken).enqueue(object : Callback<GetAllWorkspaceResponse> {
             override fun onResponse(
-                call: Call<List<GetAllWorkspaceResponseItem>>,
-                response: Response<List<GetAllWorkspaceResponseItem>>
+                call: Call<GetAllWorkspaceResponse>,
+                response: Response<GetAllWorkspaceResponse>
             ) {
                 if (response.isSuccessful) {
-                    val workspaceList = response.body()
-                    workspaceList?.let {
-                        workspaceAdapter.submitList(workspaceList)
-                    }
+                    val workspaceList = response.body()?.workspaces ?: emptyList()
+                    workspaceAdapter.submitList(workspaceList)
                 } else {
                     Log.e(TAG, "API error: ${response.code()}")
-                    // Log the raw response body for debugging
-                    val responseBody = response.errorBody()?.string() ?: ""
-                    Log.e(TAG, "Raw response: $responseBody")
-                    showToast("Error fetching workspaces. Check logs for details.")
+                    showToast("Error fetching workspaces")
                 }
             }
 
-            override fun onFailure(call: Call<List<GetAllWorkspaceResponseItem>>, t: Throwable) {
+            override fun onFailure(call: Call<GetAllWorkspaceResponse>, t: Throwable) {
                 Log.e(TAG, "Network error: ${t.message}")
                 showToast("Network error. Please check your internet connection.")
             }
@@ -101,9 +94,9 @@ class HomeActivity : AppCompatActivity() {
         createButton.setOnClickListener {
             val title = inputName.text.toString().trim()
             if (title.isNotEmpty()) {
-                val createWorkspaceRequest = CreateWorkspaceRequest(title)
-                workspaceApi.createWorkspace(authToken, createWorkspaceRequest).enqueue(object : Callback<Void> {
-                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                val createWorkspaceRequest = CreateWorkspaceRequest(title, null)
+                workspaceApi.createWorkspace(authToken, createWorkspaceRequest).enqueue(object : Callback<MessageResponse> {
+                    override fun onResponse(call: Call<MessageResponse>, response: Response<MessageResponse>) {
                         if (response.isSuccessful) {
                             showToast("Workspace created successfully")
                             fetchAllWorkspaces()
@@ -113,7 +106,7 @@ class HomeActivity : AppCompatActivity() {
                         }
                     }
 
-                    override fun onFailure(call: Call<Void>, t: Throwable) {
+                    override fun onFailure(call: Call<MessageResponse>, t: Throwable) {
                         Log.e(TAG, "Network error: ${t.message}")
                         showToast("Network error. Please try again.")
                     }

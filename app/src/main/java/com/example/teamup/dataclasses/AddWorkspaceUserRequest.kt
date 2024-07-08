@@ -1,6 +1,6 @@
 package com.example.teamup.dataclasses
 
-data class WorkspaceMemberRequest(
+data class AddWorkspaceUserRequest(
     val workspaceId: Int,
-    val memberId: Int
+    val email: String
 )

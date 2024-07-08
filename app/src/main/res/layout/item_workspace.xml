@@ -1,52 +1,66 @@
-<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@android:color/transparent"
     android:padding="20dp">
 
-    <TextView
-        android:id="@+id/workspaceNameTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Workspace Name"
-        android:textStyle="bold"
-        android:textSize="20dp"
-        android:textColor="@color/button_background_color"
-        android:layout_alignParentStart="true"
-        android:layout_centerVertical="true"/>
-
-    <ImageView
-        android:id="@+id/editWorkspaceImageView"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:padding="6.5dp"
-        android:background="@color/white"
-        android:outlineSpotShadowColor="@color/button_background_color"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_edit"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:layout_marginEnd="5dp"/>
-
-    <ImageView
-        android:id="@+id/deleteWorkspaceImageView"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:padding="5dp"
-        android:background="@color/white"
-        android:outlineSpotShadowColor="@color/button_background_color"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_delete"
-        android:layout_toStartOf="@id/editWorkspaceImageView"
-        android:layout_centerVertical="true"/>
-
-    <!-- Divider -->
-    <View
-        android:id="@+id/divider"
-        android:layout_marginTop="25dp"
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_below="@id/deleteWorkspaceImageView"
-        android:background="@color/material_dynamic_neutral70" />
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:minHeight="200dp"
+        android:elevation="2dp"
+        android:background="@color/white">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/workspaceIconIv"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@id/workspaceNameTextView"
+                android:layout_marginHorizontal="20dp"
+                android:scaleType="centerCrop"
+                tools:src="@drawable/app_icon" />
+
+            <TextView
+                android:id="@+id/workspaceNameTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Workspace Name"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_marginVertical="20dp"
+                android:layout_marginHorizontal="20dp"
+                android:textStyle="bold"
+                android:textSize="22sp"
+                android:textColor="@color/button_background_color" />
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:id="@+id/dropdownMenu"
+                android:src="@drawable/dots"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:layout_margin="20dp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/membersRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/workspaceIconIv"
+                tools:listitem="@layout/item_member"
+                android:layout_marginTop="20dp"
+                android:paddingBottom="20dp"
+                android:clipToPadding="false"/>
+
+        </RelativeLayout>
+
+    </com.google.android.material.card.MaterialCardView>
 
 </RelativeLayout>

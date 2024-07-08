@@ -1,15 +1,13 @@
-package com.example.teamup
+package com.example.teamup.network
 
 import com.google.gson.GsonBuilder
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitInstance {
-    private const val BASE_URL = "https://long-gold-betta-slip.cyclic.cloud"
+    private const val BASE_URL = "https://api.teamup.atharvagadekar.me"
 
     fun getRetrofitInstance(): Retrofit {
         val loggingInterceptor = HttpLoggingInterceptor()

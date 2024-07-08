@@ -1,27 +1,31 @@
 package com.example.teamup.adapters
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.teamup.R
-import com.example.teamup.dataclasses.GetAllWorkspaceResponseItem
+import com.bumptech.glide.Glide
+import com.example.teamup.databinding.ItemWorkspaceBinding
+import com.example.teamup.dataclasses.WorkspaceX
 
-class WorkspaceAdapter(private val itemClickListener: (Int) -> Unit) :
-    RecyclerView.Adapter<WorkspaceAdapter.WorkspaceViewHolder>() {
+class WorkspaceAdapter(
+    private val context: Context,
+    private val itemClickListener: (Int) -> Unit
+) : RecyclerView.Adapter<WorkspaceAdapter.WorkspaceViewHolder>() {
 
-    private val workspaceList = mutableListOf<GetAllWorkspaceResponseItem>()
+    private val workspaceList = mutableListOf<WorkspaceX>()
 
-    fun submitList(workspaces: List<GetAllWorkspaceResponseItem>) {
+    fun submitList(workspaces: List<WorkspaceX>) {
         workspaceList.clear()
         workspaceList.addAll(workspaces)
         notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WorkspaceViewHolder {
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_workspace, parent, false)
-        return WorkspaceViewHolder(itemView)
+        val binding = ItemWorkspaceBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return WorkspaceViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: WorkspaceViewHolder, position: Int) {
@@ -31,13 +35,32 @@ class WorkspaceAdapter(private val itemClickListener: (Int) -> Unit) :
 
     override fun getItemCount(): Int = workspaceList.size
 
-    inner class WorkspaceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val workspaceNameTextView: TextView = itemView.findViewById(R.id.workspaceNameTextView)
+    inner class WorkspaceViewHolder(private val binding: ItemWorkspaceBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(workspace: GetAllWorkspaceResponseItem) {
-            workspaceNameTextView.text = workspace.title
-            itemView.setOnClickListener {
+        fun bind(workspace: WorkspaceX) {
+            binding.workspaceNameTextView.text = workspace.title
+            binding.root.setOnClickListener {
                 itemClickListener.invoke(workspace.id)
+            }
+
+            val profiles = workspace.members.take(4).mapNotNull { it.user.profile }
+
+            val memberAdapter = MemberAdapter(context, profiles)
+            binding.membersRecyclerView.apply {
+                layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+                adapter = memberAdapter
+            }
+
+
+            if (!workspace.icon.isNullOrEmpty()) {
+                binding.workspaceIconIv.visibility = View.VISIBLE
+                Glide.with(context)
+                    .load(workspace.icon)
+                    .centerCrop()
+                    .into(binding.workspaceIconIv)
+            } else {
+                binding.workspaceIconIv.visibility = View.GONE
             }
         }
     }

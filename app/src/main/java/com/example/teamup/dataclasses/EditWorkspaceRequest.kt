@@ -1,6 +1,5 @@
 package com.example.teamup.dataclasses
 
-data class CreateListRequest(
-    val card_id: Int,
+data class EditWorkspaceRequest(
     val title: String
 )

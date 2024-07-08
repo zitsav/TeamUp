@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CardCreateActivity">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <EditText
+            android:id="@+id/etCardTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Card Title" />
+
+        <EditText
+            android:id="@+id/etCardDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Card Description" />
+
+        <EditText
+            android:id="@+id/etCardImage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Card Image URL" />
+
+        <Button
+            android:id="@+id/btnSubmit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Submit" />
+
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

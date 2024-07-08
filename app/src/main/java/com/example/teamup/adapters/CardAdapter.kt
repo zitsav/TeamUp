@@ -7,19 +7,23 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.contentValuesOf
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.teamup.R
-import com.example.teamup.RetrofitInstance
-import com.example.teamup.dataclasses.Board
+import com.example.teamup.databinding.CreateBoardBinding
+import com.example.teamup.databinding.ItemCardBinding
 import com.example.teamup.dataclasses.Card
-import com.example.teamup.dataclasses.CreateCardRequest
-import com.example.teamup.dataclasses.CreateListRequest
-import com.example.teamup.interfaces.CardApi
-import com.example.teamup.interfaces.ListApi
+import com.example.teamup.dataclasses.CreateSubtaskRequest
+import com.example.teamup.network.RetrofitInstance
+import com.example.teamup.network.SubtaskApi
+import okhttp3.internal.toImmutableList
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -30,33 +34,86 @@ class CardAdapter(
 ) : RecyclerView.Adapter<CardAdapter.CardViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
-        val itemView = LayoutInflater.from(context).inflate(R.layout.item_card, parent, false)
-        return CardViewHolder(itemView)
+        val binding = ItemCardBinding.inflate(LayoutInflater.from(context), parent, false)
+        return CardViewHolder(binding)
     }
 
-    override fun getItemCount(): Int {
-        return cardList.size
+    override fun getItemCount(): Int = cardList.size
+
+    override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
+        val currentCard = cardList[position]
+        with(holder.binding) {
+            tvCardTitle.text = currentCard.title
+            tvCardDescription.text = currentCard.description ?: ""
+
+            if (!currentCard.image.isNullOrEmpty()) {
+                Glide.with(context)
+                    .load(currentCard.image)
+                    .centerCrop()
+                    .into(cardIv)
+            }
+            else {
+                cardIv.visibility = View.GONE
+            }
+
+            val profiles = currentCard.assignedUsers.take(4).mapNotNull { it.user.profile }
+            val profileImageAdapter = MemberAdapter(context, profiles)
+            membersRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+            membersRecyclerView.adapter = profileImageAdapter
+
+            val subtasks = currentCard.subtasks.toMutableList()
+            val listAdapter = ListAdapter(context, subtasks) { subtaskPosition ->
+                val subtask = subtasks[subtaskPosition]
+                subtasks.removeAt(subtaskPosition)
+                removeSubtask(subtask.id)
+            }
+            holder.binding.recyclerViewList.layoutManager = LinearLayoutManager(context)
+            holder.binding.recyclerViewList.adapter = listAdapter
+
+            val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ): Boolean = false
+
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    val position = viewHolder.adapterPosition
+                    listAdapter.removeItem(position)
+                    removeSubtask(subtasks[position].id)
+                }
+            }
+
+            val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
+            itemTouchHelper.attachToRecyclerView(recyclerViewList)
+
+            btnAddListAtEnd.setOnClickListener {
+                addList(currentCard.id, listAdapter)
+            }
+
+            btnToggle.setOnClickListener {
+                holder.isRecyclerViewVisible = !holder.isRecyclerViewVisible
+                recyclerViewList.visibility = if (holder.isRecyclerViewVisible) View.VISIBLE else View.GONE
+                btnToggle.setImageResource(if (holder.isRecyclerViewVisible) R.drawable.baseline_arrow_drop_down_24 else R.drawable.baseline_arrow_drop_up_24)
+            }
+        }
     }
 
-    inner class CardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val cardTitleTextView: TextView = itemView.findViewById(R.id.tv_card_title)
-        val listRecyclerView: RecyclerView = itemView.findViewById(R.id.recycler_view_list)
-        val addListTextView: TextView = itemView.findViewById(R.id.tv_add_task_list)
+    inner class CardViewHolder(val binding: ItemCardBinding) : RecyclerView.ViewHolder(binding.root) {
+        var isRecyclerViewVisible: Boolean = true
     }
 
     private fun addList(cardId: Int, listAdapter: ListAdapter) {
         val builder = AlertDialog.Builder(context)
         val inflater = LayoutInflater.from(context)
-        val dialogView = inflater.inflate(R.layout.create_board, null)
-        builder.setView(dialogView)
-
-        val listNameEditText: EditText = dialogView.findViewById(R.id.inputName2Board)
+        val dialogBinding = CreateBoardBinding.inflate(inflater)
+        builder.setView(dialogBinding.root)
 
         builder.setPositiveButton("Submit") { dialog, _ ->
-            val listName = listNameEditText.text.toString()
+            val listName = dialogBinding.inputName2Board.text.toString()
             if (listName.isNotEmpty()) {
-                val createListRequest = CreateListRequest(cardId, listName)
-                createList(createListRequest, listAdapter)
+                val createSubtaskRequest = CreateSubtaskRequest(listName, cardId)
+                createSubtask(createSubtaskRequest, listAdapter)
             }
             dialog.dismiss()
         }
@@ -69,37 +126,41 @@ class CardAdapter(
         alertDialog.show()
     }
 
-    private fun createList(request: CreateListRequest, listAdapter: ListAdapter) {
-        val sharedPreferences: SharedPreferences = context.getSharedPreferences(
-            "AuthPrefs",
-            AppCompatActivity.MODE_PRIVATE
-        )
+    private fun createSubtask(request: CreateSubtaskRequest, listAdapter: ListAdapter) {
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences("AuthPrefs", AppCompatActivity.MODE_PRIVATE)
         val authToken = "Bearer ${sharedPreferences.getString("AuthToken", "")}"
-        val listApi = RetrofitInstance.getRetrofitInstance().create(ListApi::class.java)
-        val call: Call<Void> = listApi.createList(authToken, request)
+        val subtaskApi = RetrofitInstance.getRetrofitInstance().create(SubtaskApi::class.java)
+        val call: Call<Void> = subtaskApi.createSubtask(authToken, request)
 
         call.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
-                    (context as? AppCompatActivity)?.recreate()
+                    Log.d("Success", "Subtask added successfully")
                 }
             }
 
             override fun onFailure(call: Call<Void>, t: Throwable) {
+                Log.e("Error", "Failed to add subtask")
             }
         })
     }
 
-    override fun onBindViewHolder(holder: CardViewHolder, position: Int) {
-        val currentCard = cardList[position]
-        holder.cardTitleTextView.text = currentCard.title
+    private fun removeSubtask(subtaskId: Int) {
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences("AuthPrefs", AppCompatActivity.MODE_PRIVATE)
+        val authToken = "Bearer ${sharedPreferences.getString("AuthToken", "")}"
+        val subtaskApi = RetrofitInstance.getRetrofitInstance().create(SubtaskApi::class.java)
+        val call: Call<Void> = subtaskApi.deleteSubtask(authToken, subtaskId)
 
-        val listAdapter = ListAdapter(context, ArrayList(currentCard.lists))
-        holder.listRecyclerView.layoutManager = LinearLayoutManager(context)
-        holder.listRecyclerView.adapter = listAdapter
+        call.enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    Log.d("Success", "Subtask removed successfully")
+                }
+            }
 
-        holder.addListTextView.setOnClickListener {
-            addList(currentCard.id, listAdapter)
-        }
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Log.e("Error", "Failed to remove subtask")
+            }
+        })
     }
 }
