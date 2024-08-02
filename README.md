@@ -13,7 +13,7 @@ Explore the power of TeamUp with the following key features:
 
 ## Test Credentials
 For testing purposes, use the following credentials:
-- Email: 'zitsvvy@gmail.com'
+- Email: 'utsav@gmail.com'
 - Password: 'savvy123'
 
 ## Backend
