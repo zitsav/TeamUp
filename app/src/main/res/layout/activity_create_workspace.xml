@@ -5,15 +5,15 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CardCreateActivity">
+    tools:context=".CreateWorkspaceActivity">
 
     <ImageView
         android:id="@+id/iconIv"
         android:layout_width="match_parent"
         android:layout_height="150dp"
-        android:layout_margin="20dp"
         android:background="@drawable/dotted_border"
         android:src="@drawable/add"
+        android:layout_margin="20dp"
         android:padding="50dp"
         android:layout_marginBottom="10dp"
         android:visibility="visible"
@@ -23,8 +23,8 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Title"
         android:layout_marginHorizontal="20dp"
+        android:text="Title"
         android:layout_alignParentLeft="true"
         android:layout_below="@id/iconIv"
         android:textSize="20sp"
@@ -35,43 +35,15 @@
     <EditText
         android:id="@+id/titleEt"
         android:layout_width="match_parent"
-        android:layout_marginHorizontal="20dp"
         android:layout_height="60dp"
         android:layout_marginTop="5dp"
         android:ems="10"
+        android:layout_marginHorizontal="20dp"
         android:paddingHorizontal="20dp"
-        android:hint="Your Card title"
+        android:hint="Your workspace title"
         android:layout_alignParentLeft="true"
         android:layout_marginVertical="10dp"
         android:layout_below="@+id/textView"
-        android:padding="8dp"
-        />
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Description"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@id/titleEt"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="10dp"
-        android:textSize="20sp"
-        />
-
-    <EditText
-        android:id="@+id/descEt"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="5dp"
-        android:ems="10"
-        android:layout_below="@id/textView2"
-        android:paddingHorizontal="20dp"
-        android:gravity="start"
-        android:layout_marginHorizontal="20dp"
-        android:hint="Your card description"
-        android:layout_alignParentLeft="true"
-        android:layout_marginVertical="10dp"
         android:padding="8dp"
         />
 
@@ -79,10 +51,10 @@
         android:id="@+id/postAdBtn"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:text="Create Card"
+        android:text="Create Workspace"
         app:cornerRadius="12dp"
-        android:layout_margin="20dp"
         android:textSize="20sp"
+        android:layout_margin="20dp"
         android:fontFamily="@font/poppins_medium"
         android:layout_alignParentBottom="true"/>
 

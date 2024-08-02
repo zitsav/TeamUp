@@ -32,31 +32,29 @@ class ListAdapter(
 
     override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
         val currentListItem = listItems[position]
-        holder.binding.etTaskListName.text = currentListItem.title
+        with(holder.binding) {
+            etTaskListName.text = currentListItem.title
+            checkbox.isChecked = currentListItem.isDone
 
-        if (currentListItem.isDone){
-            holder.binding.ibDoneListName.visibility = View.VISIBLE
-            holder.binding.ibDoneListName.setOnClickListener{
-                editSubtask(currentListItem.id, false)
-            }
-        }
-        else{
-            holder.binding.ibDoneListName.visibility = View.INVISIBLE
-            holder.binding.checkbox.setOnClickListener{
-                editSubtask(currentListItem.id, true)
+            holder.itemView.layoutParams = RecyclerView.LayoutParams(
+                RecyclerView.LayoutParams.MATCH_PARENT,
+                RecyclerView.LayoutParams.WRAP_CONTENT
+            )
+
+            checkbox.setOnClickListener {
+                editSubtask(currentListItem.id, !currentListItem.isDone)
             }
         }
     }
 
-    override fun getItemCount(): Int {
-        return listItems.size
-    }
+    override fun getItemCount(): Int = listItems.size
 
     inner class ListViewHolder(val binding: ListItemBinding) : RecyclerView.ViewHolder(binding.root)
 
     fun removeItem(position: Int) {
-        listItems.removeAt(position)
+        val removedItem = listItems.removeAt(position)
         notifyItemRemoved(position)
+        deleteSubtask(removedItem.id)
     }
 
     private fun editSubtask(subtaskId: Int, isDone: Boolean) {
@@ -74,6 +72,25 @@ class ListAdapter(
 
             override fun onFailure(call: Call<Void>, t: Throwable) {
                 Log.e("Error", "Failed to change subtask status")
+            }
+        })
+    }
+
+    private fun deleteSubtask(subtaskId: Int) {
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences("AuthPrefs", AppCompatActivity.MODE_PRIVATE)
+        val authToken = "Bearer ${sharedPreferences.getString("AuthToken", "")}"
+        val subtaskApi = RetrofitInstance.getRetrofitInstance().create(SubtaskApi::class.java)
+        val call: Call<Void> = subtaskApi.deleteSubtask(authToken, subtaskId)
+
+        call.enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    Log.d("Success", "Subtask removed successfully")
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Log.e("Error", "Failed to remove subtask")
             }
         })
     }

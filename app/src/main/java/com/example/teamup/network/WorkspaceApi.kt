@@ -77,7 +77,7 @@ interface WorkspaceApi {
         "accept-encoding: gzip, deflate, br",
         "content-type: application/json",
     )
-    @POST("/user")
+    @POST("/api/v1/workspace/user")
     fun addWorkspaceMember(
         @Header("Authorization") accessToken: String,
         @Body request: AddWorkspaceUserRequest

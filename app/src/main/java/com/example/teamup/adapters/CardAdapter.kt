@@ -1,14 +1,18 @@
 package com.example.teamup.adapters
 
 import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipDescription
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.contentValuesOf
@@ -20,17 +24,22 @@ import com.example.teamup.R
 import com.example.teamup.databinding.CreateBoardBinding
 import com.example.teamup.databinding.ItemCardBinding
 import com.example.teamup.dataclasses.Card
+import com.example.teamup.dataclasses.ChangeCardPositionRequest
 import com.example.teamup.dataclasses.CreateSubtaskRequest
+import com.example.teamup.dataclasses.MoveCardRequest
+import com.example.teamup.network.CardApi
 import com.example.teamup.network.RetrofitInstance
 import com.example.teamup.network.SubtaskApi
 import okhttp3.internal.toImmutableList
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.Collections
 
 class CardAdapter(
     private val context: Context,
-    private val cardList: ArrayList<Card>,
+    val cardList: ArrayList<Card>,
+    private val optionClickListener: (MenuItem, Card) -> Unit
 ) : RecyclerView.Adapter<CardAdapter.CardViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
@@ -51,15 +60,24 @@ class CardAdapter(
                     .load(currentCard.image)
                     .centerCrop()
                     .into(cardIv)
-            }
-            else {
+            } else {
                 cardIv.visibility = View.GONE
             }
 
-            val profiles = currentCard.assignedUsers.take(4).mapNotNull { it.user.profile }
-            val profileImageAdapter = MemberAdapter(context, profiles)
-            membersRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-            membersRecyclerView.adapter = profileImageAdapter
+            val profileImageViews = listOf(imageView4, imageView3, imageView2, imageView1)
+            val profiles = currentCard.assignedUsers.map { it.user.profile }
+
+            profileImageViews.forEachIndexed { index, imageView ->
+                if (index < profiles.size) {
+                    imageView.visibility = View.VISIBLE
+                    Glide.with(context)
+                        .load(profiles[index])
+                        .placeholder(R.drawable.user)
+                        .into(imageView)
+                } else {
+                    imageView.visibility = View.GONE
+                }
+            }
 
             val subtasks = currentCard.subtasks.toMutableList()
             val listAdapter = ListAdapter(context, subtasks) { subtaskPosition ->
@@ -93,14 +111,53 @@ class CardAdapter(
 
             btnToggle.setOnClickListener {
                 holder.isRecyclerViewVisible = !holder.isRecyclerViewVisible
-                recyclerViewList.visibility = if (holder.isRecyclerViewVisible) View.VISIBLE else View.GONE
-                btnToggle.setImageResource(if (holder.isRecyclerViewVisible) R.drawable.baseline_arrow_drop_down_24 else R.drawable.baseline_arrow_drop_up_24)
+
+                val newHeight = if (holder.isRecyclerViewVisible) {
+                    RecyclerView.LayoutParams.WRAP_CONTENT
+                } else {
+                    0
+                }
+
+                val layoutParams = recyclerViewList.layoutParams
+                layoutParams.height = newHeight
+                recyclerViewList.layoutParams = layoutParams
+
+                val newBtnHeight = if (holder.isRecyclerViewVisible) {
+                    RecyclerView.LayoutParams.WRAP_CONTENT
+                } else {
+                    0
+                }
+
+                val btnLayoutParams = btnAddListAtEnd.layoutParams
+                btnLayoutParams.height = newBtnHeight
+                btnAddListAtEnd.layoutParams = btnLayoutParams
+
+                btnToggle.setImageResource(
+                    if (holder.isRecyclerViewVisible) R.drawable.baseline_arrow_drop_down_24
+                    else R.drawable.baseline_arrow_drop_up_24
+                )
+            }
+
+
+            dropdownMenu.setOnClickListener {
+                val popupMenu = PopupMenu(context, it)
+                popupMenu.menuInflater.inflate(R.menu.card_options, popupMenu.menu)
+                popupMenu.setOnMenuItemClickListener { menuItem ->
+                    optionClickListener(menuItem, currentCard)
+                    true
+                }
+                popupMenu.show()
             }
         }
     }
 
     inner class CardViewHolder(val binding: ItemCardBinding) : RecyclerView.ViewHolder(binding.root) {
-        var isRecyclerViewVisible: Boolean = true
+        var isRecyclerViewVisible: Boolean = false
+    }
+
+    fun removeItem(position: Int) {
+        cardList.removeAt(position)
+        notifyItemRemoved(position)
     }
 
     private fun addList(cardId: Int, listAdapter: ListAdapter) {

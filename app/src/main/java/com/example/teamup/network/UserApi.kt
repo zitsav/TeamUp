@@ -8,6 +8,7 @@ import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.Headers
+import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 
@@ -17,7 +18,7 @@ interface UserApi {
         "accept-encoding: gzip, deflate, br",
         "content-type: application/json",
     )
-    @PUT("/{id}")
+    @PUT("/api/v1/user/{id}")
     fun updateUser(
         @Header("Authorization") accessToken: String,
         @Path("id") id: Int,
@@ -29,7 +30,7 @@ interface UserApi {
         "accept-encoding: gzip, deflate, br",
         "content-type: application/json",
     )
-    @PUT("/search")
+    @POST("/api/v1/user/search")
     fun searchUser(
         @Header("Authorization") accessToken: String,
         @Body request: SearchUserRequest

@@ -4,5 +4,5 @@ data class CreateCardRequest(
     val title: String,
     val description: String?,
     val image: String?,
-    val boardId: Int
+    val board_id: Int
 )

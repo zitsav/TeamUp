@@ -29,7 +29,7 @@ interface SubtaskApi {
         "accept-encoding: gzip, deflate, br",
         "content-type: application/json",
     )
-    @PUT("/api/v1/subtask")
+    @PUT("/api/v1/subtask/{id}")
     fun editSubtask(
         @Header("Authorization") accessToken: String,
         @Path("id") id: Int,

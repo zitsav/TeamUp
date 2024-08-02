@@ -1,36 +1,26 @@
 {
   "project_info": {
-    "project_number": "1078951433699",
-    "project_id": "campusolx-e7200",
-    "storage_bucket": "campusolx-e7200.appspot.com"
+    "project_number": "265664897865",
+    "project_id": "teamup-7494f",
+    "storage_bucket": "teamup-7494f.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1078951433699:android:375ff82a323812c7b37cd6",
+        "mobilesdk_app_id": "1:265664897865:android:8967f87f939d65a1293098",
         "android_client_info": {
-          "package_name": "com.example.campusolx"
+          "package_name": "com.example.teamup"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "1078951433699-ufa7v7n0v0p82qgpb8ce3uc015toh23o.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDhcQ0EFLD90wX8rtX8ADA3huCG5kF3iZQ"
+          "current_key": "AIzaSyDeyE8nV-tCsl2IjevPIw6GrZm7i2oiL14"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "1078951433699-ufa7v7n0v0p82qgpb8ce3uc015toh23o.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

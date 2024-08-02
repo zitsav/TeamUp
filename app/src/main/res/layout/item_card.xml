@@ -68,23 +68,73 @@
                 tools:src="@drawable/app_icon"
                 />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/membersRecyclerView"
-                android:layout_width="match_parent"
+            <FrameLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/memberLayout"
                 android:layout_below="@id/card_iv"
-                tools:listitem="@layout/item_member"
-                android:layout_marginTop="20dp"
-                android:paddingBottom="20dp"
-                android:orientation="horizontal"
-                android:clipToPadding="false"/>
+                android:layout_alignParentRight="true"
+                android:layout_margin="20dp"
+                >
+
+                <ImageView
+                    android:id="@+id/imageView4"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="70dp"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/circle_shape"
+                    android:src="@drawable/user"
+                    android:padding="5dp"
+                    android:visibility="invisible"
+                    android:scaleType="centerCrop"/>
+
+                <ImageView
+                    android:id="@+id/imageView3"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="50dp"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/circle_shape"
+                    android:src="@drawable/user"
+                    android:padding="5dp"
+                    android:visibility="invisible"
+                    android:scaleType="centerCrop"/>
+
+                <ImageView
+                    android:id="@+id/imageView2"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="30dp"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/circle_shape"
+                    android:src="@drawable/user"
+                    android:padding="5dp"
+                    android:visibility="invisible"
+                    android:scaleType="centerCrop"/>
+
+                <ImageView
+                    android:id="@+id/imageView1"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/circle_shape"
+                    android:src="@drawable/user"
+                    android:padding="5dp"
+                    android:visibility="invisible"
+                    tools:visibility="visible"
+                    android:scaleType="centerCrop"/>
+
+
+            </FrameLayout>
 
             <ImageView
                 android:id="@+id/btn_toggle"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_alignParentRight="true"
-                android:layout_below="@id/membersRecyclerView"
+                android:layout_below="@id/memberLayout"
                 android:layout_marginHorizontal="15dp"
                 android:src="@drawable/baseline_arrow_drop_down_24"
                 android:text="Toggle" />
@@ -93,7 +143,7 @@
                 android:id="@+id/recycler_view_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/btn_toggle"
+                android:layout_below="@id/btn_add_list_at_end"
                 android:layout_margin="8dp"
                 android:elevation="4dp"
                 tools:listitem="@layout/list_item" />
@@ -102,10 +152,10 @@
                 android:id="@+id/btn_add_list_at_end"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/recycler_view_list"
+                android:layout_below="@id/btn_toggle"
                 android:layout_margin="15dp"
                 android:background="@drawable/dotted_border"
-                android:text="Add List"
+                android:text="Add Subtask"
                 android:textColor="@color/secondary_text"
                 android:textColorLink="#FFFFFF"
                 android:visibility="visible" />
