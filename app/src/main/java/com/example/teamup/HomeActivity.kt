@@ -21,6 +21,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.teamup.adapters.SearchUserAdapter
 import com.example.teamup.adapters.WorkspaceAdapter
+import com.example.teamup.database.AppDatabase
+import com.example.teamup.database.UserDao
 import com.example.teamup.databinding.ActivityHomeBinding
 import com.example.teamup.dataclasses.AddWorkspaceUserRequest
 import com.example.teamup.dataclasses.CreateWorkspaceRequest
@@ -33,6 +35,10 @@ import com.example.teamup.dataclasses.User
 import com.example.teamup.network.RetrofitInstance
 import com.example.teamup.network.UserApi
 import com.example.teamup.network.WorkspaceApi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -42,10 +48,9 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var workspaceApi: WorkspaceApi
     private lateinit var userApi: UserApi
     private lateinit var workspaceAdapter: WorkspaceAdapter
-    private lateinit var accessToken: String
     private lateinit var authToken: String
     private lateinit var binding: ActivityHomeBinding
-
+    private lateinit var userDao: UserDao
     private var addUserDialog: AlertDialog? = null
     private var editWorkspaceDialog: AlertDialog? = null
 
@@ -56,11 +61,24 @@ class HomeActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.toolbar)
         val toggle = ActionBarDrawerToggle(
-            this, binding.drawerLayout, binding.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
+            this, binding.drawerLayout, binding.toolbar,
+            R.string.navigation_drawer_open, R.string.navigation_drawer_close
         )
         binding.drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 
+        userDao = AppDatabase.getDatabase(this).userDao()
+        CoroutineScope(Dispatchers.IO).launch {
+            val authTokenEntity = userDao.getAuthToken()
+            authToken = "Bearer ${authTokenEntity?.token}"
+
+            withContext(Dispatchers.Main) {
+                setupUI()
+            }
+        }
+    }
+
+    private fun setupUI() {
         workspaceApi = RetrofitInstance.getRetrofitInstance().create(WorkspaceApi::class.java)
         userApi = RetrofitInstance.getRetrofitInstance().create(UserApi::class.java)
 
@@ -70,11 +88,6 @@ class HomeActivity : AppCompatActivity() {
             handleOptionClick(workspaceId, menuItem)
         })
         binding.recyclerView.adapter = workspaceAdapter
-
-        val sharedPreferences = getSharedPreferences("AuthPrefs", MODE_PRIVATE)
-        accessToken = sharedPreferences.getString("AuthToken", "") ?: ""
-        authToken = "Bearer $accessToken"
-
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
 
         fetchAllWorkspaces()
@@ -83,16 +96,6 @@ class HomeActivity : AppCompatActivity() {
         binding.fabCreateBoard.setOnClickListener {
             startActivity(Intent(this, CreateWorkspaceActivity::class.java))
             binding.drawerLayout.closeDrawer(GravityCompat.START)
-        }
-
-        binding.navView.setNavigationItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_menu -> {
-                    binding.drawerLayout.closeDrawer(GravityCompat.START)
-                    true
-                }
-                else -> false
-            }
         }
     }
 
@@ -103,17 +106,14 @@ class HomeActivity : AppCompatActivity() {
                     binding.drawerLayout.closeDrawer(GravityCompat.START)
                     true
                 }
+                R.id.nav_notification -> {
+                    showToast("Notifications not implemented yet")
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                    true
+                }
                 else -> false
             }
         }
-
-//        val user = getUserProfile()  // Assume this function fetches the user's profile
-//        profileName.text = user.name
-//        profileEmail.text = user.email
-//        // Load profile image
-//        Glide.with(this)
-//            .load(user.profile ?: R.drawable.user_default)
-//            .into(profileImage)
     }
 
     private fun fetchAllWorkspaces() {

@@ -18,6 +18,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
+import com.example.teamup.database.AppDatabase
+import com.example.teamup.database.UserDao
 import com.example.teamup.databinding.ActivityCreateWorkspaceBinding
 import com.example.teamup.dataclasses.CreateWorkspaceRequest
 import com.example.teamup.dataclasses.MessageResponse
@@ -26,6 +29,10 @@ import com.example.teamup.network.WorkspaceApi
 import com.google.firebase.FirebaseApp
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -39,6 +46,7 @@ class CreateWorkspaceActivity : AppCompatActivity() {
     private lateinit var storageReference: StorageReference
     private lateinit var workspaceApi: WorkspaceApi
     private lateinit var progressDialog: ProgressDialog
+    private lateinit var userDao: UserDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,10 +59,19 @@ class CreateWorkspaceActivity : AppCompatActivity() {
 
         initializeFirebaseStorage()
 
-        val sharedPreferences = getSharedPreferences("AuthPrefs", MODE_PRIVATE)
-        val accessToken = sharedPreferences.getString("AuthToken", "") ?: ""
-        authToken = "Bearer $accessToken"
+        userDao = AppDatabase.getDatabase(this).userDao()
 
+        CoroutineScope(Dispatchers.IO).launch {
+            val authTokenEntity = userDao.getAuthToken()
+            authToken = "Bearer ${authTokenEntity?.token}"
+
+            withContext(Dispatchers.Main) {
+                setupUI()
+            }
+        }
+    }
+
+    private fun setupUI(){
         workspaceApi = RetrofitInstance.getRetrofitInstance().create(WorkspaceApi::class.java)
 
         progressDialog = ProgressDialog(this).apply {

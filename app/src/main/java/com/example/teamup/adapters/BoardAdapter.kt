@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.teamup.CardCreateActivity
 import com.example.teamup.R
 import com.example.teamup.WorkspaceActivity
+import com.example.teamup.database.AppDatabase
+import com.example.teamup.database.UserDao
 import com.example.teamup.databinding.CreateBoardBinding
 import com.example.teamup.databinding.ItemBoardBinding
 import com.example.teamup.dataclasses.Board
@@ -25,6 +27,9 @@ import com.example.teamup.dataclasses.ChangeCardPositionRequest
 import com.example.teamup.network.RetrofitInstance
 import com.example.teamup.dataclasses.CreateCardRequest
 import com.example.teamup.network.CardApi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -32,7 +37,8 @@ import retrofit2.Response
 class BoardAdapter(
     private val context: Context,
     private val boardList: ArrayList<Board>,
-    private val listener: OnClickListener
+    private val listener: OnClickListener,
+    private val userDao: UserDao
 ) : RecyclerView.Adapter<BoardAdapter.BoardViewHolder>() {
 
     interface OnClickListener {
@@ -51,9 +57,14 @@ class BoardAdapter(
         with(holder.binding) {
             tvBoardTitle.text = currentBoard.title
 
-            val cardAdapter = CardAdapter(context, ArrayList(currentBoard.cards)) { menuItem, card ->
-                (context as WorkspaceActivity).handleCardOptionClick(menuItem, card)
-            }
+            val cardAdapter = CardAdapter(
+                context,
+                ArrayList(currentBoard.cards),
+                { menuItem, card ->
+                    (context as WorkspaceActivity).handleCardOptionClick(menuItem, card)
+                },
+                userDao
+            )
             recyclerViewCards.layoutManager = LinearLayoutManager(context)
             recyclerViewCards.adapter = cardAdapter
 
@@ -73,8 +84,8 @@ class BoardAdapter(
                     return true
                 }
 
-                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                    // No swipe action for cards
+               override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+
                 }
             }
 
@@ -95,28 +106,32 @@ class BoardAdapter(
     }
 
     inner class BoardViewHolder(val binding: ItemBoardBinding) : RecyclerView.ViewHolder(binding.root)
-}
 
-private fun updateCardPositions(cards: List<Card>, fromPosition: Int, toPosition: Int, boardId: Int, context: Context) {
-    val sharedPreferences: SharedPreferences = context.getSharedPreferences("AuthPrefs", AppCompatActivity.MODE_PRIVATE)
-    val authToken = "Bearer ${sharedPreferences.getString("AuthToken", "")}"
-    val cardApi = RetrofitInstance.getRetrofitInstance().create(CardApi::class.java)
-
-    val movedCard = cards[fromPosition]
-    val newPosition = toPosition + 1
-
-    val changeCardPositionRequest = ChangeCardPositionRequest(newPosition)
-    val call: Call<Void> = cardApi.changeCardPosition(authToken, movedCard.id, changeCardPositionRequest)
-
-    call.enqueue(object : Callback<Void> {
-        override fun onResponse(call: Call<Void>, response: Response<Void>) {
-            if (response.isSuccessful) {
-                Log.d("Success", "Card position updated successfully")
+    private fun updateCardPositions(cards: List<Card>, fromPosition: Int, toPosition: Int, boardId: Int, context: Context) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val authTokenEntity = (context as AppCompatActivity).let {
+                AppDatabase.getDatabase(it).userDao().getAuthToken()
             }
-        }
+            val authToken = "Bearer ${authTokenEntity?.token}"
+            val cardApi = RetrofitInstance.getRetrofitInstance().create(CardApi::class.java)
 
-        override fun onFailure(call: Call<Void>, t: Throwable) {
-            Log.e("Error", "Failed to update card position")
+            val movedCard = cards[fromPosition]
+            val newPosition = toPosition + 1
+
+            val changeCardPositionRequest = ChangeCardPositionRequest(newPosition)
+            val call: Call<Void> = cardApi.changeCardPosition(authToken, movedCard.id, changeCardPositionRequest)
+
+            call.enqueue(object : Callback<Void> {
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    if (response.isSuccessful) {
+                        Log.d("Success", "Card position updated successfully")
+                    }
+                }
+
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    Log.e("Error", "Failed to update card position")
+                }
+            })
         }
-    })
+    }
 }

@@ -21,6 +21,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.teamup.R
+import com.example.teamup.database.AppDatabase
+import com.example.teamup.database.UserDao
 import com.example.teamup.databinding.CreateBoardBinding
 import com.example.teamup.databinding.ItemCardBinding
 import com.example.teamup.dataclasses.Card
@@ -30,6 +32,9 @@ import com.example.teamup.dataclasses.MoveCardRequest
 import com.example.teamup.network.CardApi
 import com.example.teamup.network.RetrofitInstance
 import com.example.teamup.network.SubtaskApi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import okhttp3.internal.toImmutableList
 import retrofit2.Call
 import retrofit2.Callback
@@ -39,7 +44,8 @@ import java.util.Collections
 class CardAdapter(
     private val context: Context,
     val cardList: ArrayList<Card>,
-    private val optionClickListener: (MenuItem, Card) -> Unit
+    private val optionClickListener: (MenuItem, Card) -> Unit,
+    private val userDao: UserDao
 ) : RecyclerView.Adapter<CardAdapter.CardViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {
@@ -80,9 +86,9 @@ class CardAdapter(
             }
 
             val subtasks = currentCard.subtasks.toMutableList()
-            val listAdapter = ListAdapter(context, subtasks) { subtaskPosition ->
-                val subtask = subtasks[subtaskPosition]
-                subtasks.removeAt(subtaskPosition)
+            val listAdapter = ListAdapter(context, subtasks, userDao) { position ->
+                val subtask = subtasks[position]
+                subtasks.removeAt(position)
                 removeSubtask(subtask.id)
             }
             holder.binding.recyclerViewList.layoutManager = LinearLayoutManager(context)
@@ -97,17 +103,14 @@ class CardAdapter(
 
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                     val position = viewHolder.adapterPosition
-                    listAdapter.removeItem(position)
-                    removeSubtask(subtasks[position].id)
+                    if (position != RecyclerView.NO_POSITION) {
+                        listAdapter.removeItem(position)
+                    }
                 }
             }
 
             val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
-            itemTouchHelper.attachToRecyclerView(recyclerViewList)
-
-            btnAddListAtEnd.setOnClickListener {
-                addList(currentCard.id, listAdapter)
-            }
+            itemTouchHelper.attachToRecyclerView(holder.binding.recyclerViewList)
 
             btnToggle.setOnClickListener {
                 holder.isRecyclerViewVisible = !holder.isRecyclerViewVisible
@@ -138,7 +141,6 @@ class CardAdapter(
                 )
             }
 
-
             dropdownMenu.setOnClickListener {
                 val popupMenu = PopupMenu(context, it)
                 popupMenu.menuInflater.inflate(R.menu.card_options, popupMenu.menu)
@@ -147,6 +149,10 @@ class CardAdapter(
                     true
                 }
                 popupMenu.show()
+            }
+
+            btnAddListAtEnd.setOnClickListener {
+                addList(currentCard.id, listAdapter)
             }
         }
     }
@@ -184,40 +190,49 @@ class CardAdapter(
     }
 
     private fun createSubtask(request: CreateSubtaskRequest, listAdapter: ListAdapter) {
-        val sharedPreferences: SharedPreferences = context.getSharedPreferences("AuthPrefs", AppCompatActivity.MODE_PRIVATE)
-        val authToken = "Bearer ${sharedPreferences.getString("AuthToken", "")}"
-        val subtaskApi = RetrofitInstance.getRetrofitInstance().create(SubtaskApi::class.java)
-        val call: Call<Void> = subtaskApi.createSubtask(authToken, request)
+        CoroutineScope(Dispatchers.IO).launch {
+            val authTokenEntity = (context as AppCompatActivity).let {
+                AppDatabase.getDatabase(it).userDao().getAuthToken()
+            }
+            val authToken = "Bearer ${authTokenEntity?.token}"
+            val subtaskApi = RetrofitInstance.getRetrofitInstance().create(SubtaskApi::class.java)
+            val call: Call<Void> = subtaskApi.createSubtask(authToken, request)
 
-        call.enqueue(object : Callback<Void> {
-            override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                if (response.isSuccessful) {
-                    Log.d("Success", "Subtask added successfully")
+            call.enqueue(object : Callback<Void> {
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    if (response.isSuccessful) {
+                        Log.d("Success", "Subtask added successfully")
+                        // Optionally refresh the list if needed
+                    }
                 }
-            }
 
-            override fun onFailure(call: Call<Void>, t: Throwable) {
-                Log.e("Error", "Failed to add subtask")
-            }
-        })
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    Log.e("Error", "Failed to add subtask")
+                }
+            })
+        }
     }
 
     private fun removeSubtask(subtaskId: Int) {
-        val sharedPreferences: SharedPreferences = context.getSharedPreferences("AuthPrefs", AppCompatActivity.MODE_PRIVATE)
-        val authToken = "Bearer ${sharedPreferences.getString("AuthToken", "")}"
-        val subtaskApi = RetrofitInstance.getRetrofitInstance().create(SubtaskApi::class.java)
-        val call: Call<Void> = subtaskApi.deleteSubtask(authToken, subtaskId)
+        CoroutineScope(Dispatchers.IO).launch {
+            val authTokenEntity = (context as AppCompatActivity).let {
+                AppDatabase.getDatabase(it).userDao().getAuthToken()
+            }
+            val authToken = "Bearer ${authTokenEntity?.token}"
+            val subtaskApi = RetrofitInstance.getRetrofitInstance().create(SubtaskApi::class.java)
+            val call: Call<Void> = subtaskApi.deleteSubtask(authToken, subtaskId)
 
-        call.enqueue(object : Callback<Void> {
-            override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                if (response.isSuccessful) {
-                    Log.d("Success", "Subtask removed successfully")
+            call.enqueue(object : Callback<Void> {
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    if (response.isSuccessful) {
+                        Log.d("Success", "Subtask removed successfully")
+                    }
                 }
-            }
 
-            override fun onFailure(call: Call<Void>, t: Throwable) {
-                Log.e("Error", "Failed to remove subtask")
-            }
-        })
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    Log.e("Error", "Failed to remove subtask")
+                }
+            })
+        }
     }
 }

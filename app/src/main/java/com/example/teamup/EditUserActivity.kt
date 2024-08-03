@@ -15,6 +15,8 @@ import android.view.Menu
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.PopupMenu
+import com.example.teamup.database.AppDatabase
+import com.example.teamup.database.UserDao
 import com.example.teamup.databinding.ActivityEditUserBinding
 import com.example.teamup.dataclasses.MessageResponse
 import com.example.teamup.dataclasses.UpdateUserRequest
@@ -24,6 +26,10 @@ import com.example.teamup.network.UserApi
 import com.google.firebase.FirebaseApp
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -38,6 +44,7 @@ class EditUserActivity : AppCompatActivity() {
     private lateinit var userApi: UserApi
     private lateinit var progressDialog: ProgressDialog
     private var userId: Int = -1
+    private lateinit var userDao: UserDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,10 +57,19 @@ class EditUserActivity : AppCompatActivity() {
 
         initializeFirebaseStorage()
 
-        val sharedPreferences = getSharedPreferences("AuthPrefs", MODE_PRIVATE)
-        val accessToken = sharedPreferences.getString("AuthToken", "") ?: ""
-        authToken = "Bearer $accessToken"
+        userDao = AppDatabase.getDatabase(this).userDao()
 
+        CoroutineScope(Dispatchers.IO).launch {
+            val authTokenEntity = userDao.getAuthToken()
+            authToken = "Bearer ${authTokenEntity?.token}"
+
+            withContext(Dispatchers.Main) {
+                setupUI()
+            }
+        }
+    }
+
+    private fun setupUI(){
         userApi = RetrofitInstance.getRetrofitInstance().create(UserApi::class.java)
 
         progressDialog = ProgressDialog(this).apply {

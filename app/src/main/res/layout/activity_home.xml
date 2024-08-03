@@ -12,23 +12,11 @@
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
-            app:layout_constraintTop_toTopOf="parent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/colorPrimary"
-            android:theme="?attr/actionBarTheme" />
-
-        <View
-            android:id="@+id/dividerLine"
-            app:layout_goneMarginTop="15dp"
-            android:layout_width="0dp"
-            android:layout_height="2dp"
-            android:background="@android:color/darker_gray"
-            app:layout_constraintTop_toBottomOf="@id/toolbar"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"/>
+            android:theme="?attr/actionBarTheme"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
@@ -37,30 +25,23 @@
             app:layout_constraintTop_toBottomOf="@id/toolbar"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:listitem="@layout/item_workspace" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_create_board"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:elevation="6dp"
             android:src="@drawable/ic_add"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.954"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/recyclerView"
-            app:layout_constraintVertical_bias="0.976"
-            app:tint="@color/button_background_color" />
+            android:layout_margin="16dp"
+            app:backgroundTint="@color/button_background_color" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:menu="@menu/drawer_menu">
@@ -73,31 +54,30 @@
             android:padding="16dp">
 
             <ImageView
-                android:layout_marginTop="100dp"
                 android:id="@+id/profileImage"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_gravity="center_horizontal"
                 android:src="@drawable/user"
-                android:contentDescription="profile picture" />
+                android:contentDescription="profile picture"
+                android:layout_gravity="center_horizontal" />
 
             <TextView
                 android:id="@+id/profileName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
                 android:textSize="18sp"
                 android:textColor="@color/black"
-                android:text="Name" />
+                android:text="Name"
+                android:layout_gravity="center_horizontal" />
 
             <TextView
                 android:id="@+id/profileEmail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
                 android:textSize="14sp"
                 android:textColor="@color/black"
-                android:text="Email" />
+                android:text="Email"
+                android:layout_gravity="center_horizontal" />
 
             <Button
                 android:id="@+id/btnEditProfile"
@@ -120,4 +100,5 @@
                 android:layout_marginTop="8dp" />
         </LinearLayout>
     </com.google.android.material.navigation.NavigationView>
+
 </androidx.drawerlayout.widget.DrawerLayout>

@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.teamup.adapters.BoardAdapter
 import com.example.teamup.adapters.SearchUserAdapter
+import com.example.teamup.database.AppDatabase
+import com.example.teamup.database.UserDao
 import com.example.teamup.databinding.ActivityWorkspaceBinding
 import com.example.teamup.databinding.CreateBoardBinding
 import com.example.teamup.dataclasses.AddCardUserRequest
@@ -31,6 +33,10 @@ import com.example.teamup.network.RetrofitInstance
 import com.example.teamup.network.UserApi
 import com.example.teamup.network.WorkspaceApi
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -45,6 +51,7 @@ class WorkspaceActivity : AppCompatActivity(), BoardAdapter.OnClickListener {
     private lateinit var boardApi: BoardApi
     private lateinit var cardApi: CardApi
     private lateinit var userApi: UserApi
+    private lateinit var userDao: UserDao
     private var workspaceId: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,17 +59,29 @@ class WorkspaceActivity : AppCompatActivity(), BoardAdapter.OnClickListener {
         binding = ActivityWorkspaceBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        userDao = AppDatabase.getDatabase(this).userDao()
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val authTokenEntity = userDao.getAuthToken()
+            authToken = "Bearer ${authTokenEntity?.token}"
+
+            withContext(Dispatchers.Main) {
+                setupApis()
+                setupUI()
+                fetchWorkspaceById(workspaceId)
+            }
+        }
+    }
+
+    private fun setupApis() {
         workspaceApi = RetrofitInstance.getRetrofitInstance().create(WorkspaceApi::class.java)
         boardApi = RetrofitInstance.getRetrofitInstance().create(BoardApi::class.java)
         cardApi = RetrofitInstance.getRetrofitInstance().create(CardApi::class.java)
         userApi = RetrofitInstance.getRetrofitInstance().create(UserApi::class.java)
+    }
 
-        val sharedPreferences: SharedPreferences = getSharedPreferences("AuthPrefs", MODE_PRIVATE)
-        authToken = "Bearer ${sharedPreferences.getString("AuthToken", "")}"
-
+    private fun setupUI() {
         workspaceId = intent.getIntExtra("workspaceId", -1)
-
-        fetchWorkspaceById(workspaceId)
     }
 
     private fun fetchWorkspaceById(workspaceId: Int) {
@@ -76,6 +95,8 @@ class WorkspaceActivity : AppCompatActivity(), BoardAdapter.OnClickListener {
                         val boardList = ArrayList(workspace.boards)
                         setupRecyclerView(boardList)
                     }
+                } else {
+                    Log.e("WorkspaceActivity", "Error fetching workspace: ${response.code()}")
                 }
             }
 
@@ -86,8 +107,9 @@ class WorkspaceActivity : AppCompatActivity(), BoardAdapter.OnClickListener {
     }
 
     private fun setupRecyclerView(boardList: ArrayList<Board>) {
+        val userDao = AppDatabase.getDatabase(this).userDao()
         binding.recyclerViewBoards.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        boardAdapter = BoardAdapter(this, boardList, this)
+        boardAdapter = BoardAdapter(this, boardList, this, userDao)
         binding.recyclerViewBoards.adapter = boardAdapter
     }
 
@@ -186,10 +208,6 @@ class WorkspaceActivity : AppCompatActivity(), BoardAdapter.OnClickListener {
     }
 
     fun moveCardToDifferentBoard(cardId: Int, newBoardId: Int, newPosition: Int) {
-        val sharedPreferences: SharedPreferences = getSharedPreferences("AuthPrefs", MODE_PRIVATE)
-        val authToken = "Bearer ${sharedPreferences.getString("AuthToken", "")}"
-        val cardApi = RetrofitInstance.getRetrofitInstance().create(CardApi::class.java)
-
         val moveCardRequest = MoveCardRequest(newBoardId, newPosition)
         val call: Call<Void> = cardApi.moveCardToDifferentBoard(authToken, cardId, moveCardRequest)
 
@@ -197,14 +215,18 @@ class WorkspaceActivity : AppCompatActivity(), BoardAdapter.OnClickListener {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
                     Log.d("Success", "Card moved to different board successfully")
+                } else {
+                    Log.e("Error", "Failed to move card to different board: ${response.code()}")
                 }
             }
 
             override fun onFailure(call: Call<Void>, t: Throwable) {
-                Log.e("Error", "Failed to move card to different board")
+                Log.e("Error", "Failed to move card to different board: ${t.message}")
             }
         })
-    }    private fun showToast(message: String) {
+    }
+
+    private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }

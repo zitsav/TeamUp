@@ -30,7 +30,6 @@ class MemberAdapter(
     }
 
     override fun getItemCount(): Int {
-        // Limiting to the first 4 items
         return if (profiles.size > 4) 4 else profiles.size
     }
 
