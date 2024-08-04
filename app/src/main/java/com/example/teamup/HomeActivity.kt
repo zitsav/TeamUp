@@ -12,10 +12,13 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -35,6 +38,7 @@ import com.example.teamup.dataclasses.User
 import com.example.teamup.network.RetrofitInstance
 import com.example.teamup.network.UserApi
 import com.example.teamup.network.WorkspaceApi
+import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -100,18 +104,46 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun setupNavigationDrawer() {
-        binding.navView.setNavigationItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_menu -> {
-                    binding.drawerLayout.closeDrawer(GravityCompat.START)
-                    true
+        val headerView = binding.navView.getHeaderView(0)
+        if (headerView == null) {
+            Log.e(TAG, "Navigation header view is null")
+            return
+        }
+        val profileImage = headerView.findViewById<ImageView>(R.id.profileImage)
+        val profileName = headerView.findViewById<TextView>(R.id.profileName)
+        val profileEmail = headerView.findViewById<TextView>(R.id.profileEmail)
+        val btnEditProfile = headerView.findViewById<MaterialButton>(R.id.btnEditProfile)
+        val btnLogout = headerView.findViewById<MaterialButton>(R.id.btnLogout)
+
+        btnEditProfile.setOnClickListener {
+            startActivity(Intent(this, EditUserActivity::class.java))
+        }
+
+        btnLogout.setOnClickListener {
+            lifecycleScope.launch {
+                userDao.deleteAuthToken()
+                userDao.deleteUser()
+                startActivity(Intent(this@HomeActivity, MainActivity::class.java))
+                finish()
+            }
+        }
+
+        loadUserProfile(profileImage, profileName, profileEmail)
+    }
+
+    private fun loadUserProfile(profileImage: ImageView, profileName: TextView, profileEmail: TextView) {
+        lifecycleScope.launch {
+            val user = userDao.getUser()
+            user?.let {
+                withContext(Dispatchers.Main) {
+                    profileName.text = it.name?:""
+                    profileEmail.text = it.email?:""
+                    if (it.profile != null) {
+                        Glide.with(this@HomeActivity).load(it.profile).into(profileImage)
+                    } else {
+                        profileImage.setImageResource(R.drawable.user)
+                    }
                 }
-                R.id.nav_notification -> {
-                    showToast("Notifications not implemented yet")
-                    binding.drawerLayout.closeDrawer(GravityCompat.START)
-                    true
-                }
-                else -> false
             }
         }
     }

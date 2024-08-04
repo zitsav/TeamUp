@@ -2,69 +2,63 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".EditUserActivity"
     android:background="#f1f1f1">
 
-    <LinearLayout
-        android:id="@+id/register_container2"
+    <ImageView
+        android:id="@+id/image_profile2"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginBottom="50dp"
+        android:layout_marginTop="100dp"
+        android:layout_alignParentTop="true"
+        android:gravity="center"
+        android:src="@drawable/user" />
+
+    <ImageView
+        android:id="@+id/btn_upload_profile2"
+        android:layout_width="40dp"
+        android:padding="10dp"
+        android:layout_height="40dp"
+        android:background="@drawable/circle_shape"
+        android:src="@drawable/pencil"
+        android:layout_marginBottom="-20dp"
+        android:layout_alignBottom="@id/image_profile2"
+        android:layout_marginLeft="220dp"
+        app:tint="@color/black"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/name_input_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_margin="10dp"
+        android:layout_below="@+id/image_profile2"
+        android:layout_marginTop="16dp">
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="16dp">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <ImageView
-                    android:id="@+id/image_profile2"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_gravity="center_horizontal"
-                    android:src="@drawable/user" />
-
-                <Button
-                    android:id="@+id/btn_upload_profile2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="8dp"
-                    android:text="UPDATE PROFILE PICTURE" />
-
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/name_input_layout2"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_text_name2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp">
+            android:hint="Name"
+            android:inputType="textPersonName" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/edit_text_name2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Name"
-                android:inputType="textPersonName" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-        </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_register2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/rounded_button_background"
+        app:backgroundTint="@color/blue"
+        android:text="UPDATE USER"
+        android:layout_margin="20dp"
+        android:layout_alignParentBottom="true"
+        android:textColor="#ffffff" />
 
-        <Button
-            android:id="@+id/btn_register2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/rounded_button_background"
-            android:text="UPDATE NAME"
-            android:textColor="#ffffff" />
-
-    </LinearLayout>
 </RelativeLayout>

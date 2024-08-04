@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="button_background_color">#906FD2</color>
-    <color name="background">#F9EFE5</color>
-    <color name="text">#000000</color>
-    <color name="secondary_text">#7F8790</color>
+    <color name="black">#222526</color>
+    <color name="white">#FAFBFC</color>
+    <color name="button_background_color">#83AEFD</color>
+    <color name="background">#F2F5FF</color>
+    <color name="text">#464B4D</color>
+    <color name="secondary_text">#8F969B</color>
     <color name="light">#F8F8F8</color>
+    <color name="blue">#137BF2</color>
+    <color name="grey_text">#B4BBC2</color>
+    <color name="light_blue">#4A92FA</color>
+    <color name="yellow">#FDFD96</color>
+    <color name="red">#FF6961</color>
+    <color name="green">#77dd77</color>
 </resources>

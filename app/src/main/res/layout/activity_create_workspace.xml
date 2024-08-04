@@ -5,13 +5,14 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/black"
     tools:context=".CreateWorkspaceActivity">
 
     <ImageView
         android:id="@+id/iconIv"
         android:layout_width="match_parent"
         android:layout_height="150dp"
-        android:background="@drawable/dotted_border"
+        android:background="@drawable/dotted_border_light"
         android:src="@drawable/add"
         android:layout_margin="20dp"
         android:padding="50dp"
@@ -29,25 +30,33 @@
         android:layout_below="@id/iconIv"
         android:textSize="20sp"
         android:layout_marginTop="10dp"
-        android:textColor="@color/black"
+        android:textColor="@color/white"
         />
 
-    <EditText
-        android:id="@+id/titleEt"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/text_input"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:ems="10"
         android:layout_marginHorizontal="20dp"
-        android:paddingHorizontal="20dp"
-        android:hint="Your workspace title"
-        android:layout_alignParentLeft="true"
         android:layout_marginVertical="10dp"
-        android:layout_below="@+id/textView"
-        android:padding="8dp"
-        />
+        android:layout_below="@id/textView"
+        app:hintTextColor="@color/grey_text">
 
-    <Button
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/titleEt"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:ems="10"
+            android:paddingHorizontal="20dp"
+            android:hint="Your workspace title"
+            android:textColor="@color/white"
+            android:textColorHint="@color/grey_text"
+            android:padding="8dp"
+            />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/postAdBtn"
         android:layout_width="match_parent"
         android:layout_height="60dp"
@@ -55,6 +64,7 @@
         app:cornerRadius="12dp"
         android:textSize="20sp"
         android:layout_margin="20dp"
+        android:backgroundTint="@color/blue"
         android:fontFamily="@font/poppins_medium"
         android:layout_alignParentBottom="true"/>
 

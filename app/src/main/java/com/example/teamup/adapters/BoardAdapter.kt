@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -57,6 +58,9 @@ class BoardAdapter(
         with(holder.binding) {
             tvBoardTitle.text = currentBoard.title
 
+            val dividerColor = getDividerColor(currentBoard.title)
+            dividerLine.setBackgroundColor(dividerColor)
+
             val cardAdapter = CardAdapter(
                 context,
                 ArrayList(currentBoard.cards),
@@ -84,8 +88,7 @@ class BoardAdapter(
                     return true
                 }
 
-               override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 }
             }
 
@@ -104,6 +107,16 @@ class BoardAdapter(
             }
         }
     }
+
+    private fun getDividerColor(title: String): Int {
+        return when (title) {
+            "Ongoing" -> ContextCompat.getColor(context, R.color.yellow)
+            "ToDo" -> ContextCompat.getColor(context, R.color.red)
+            "Finished" -> ContextCompat.getColor(context, R.color.green)
+            else -> ContextCompat.getColor(context, R.color.background)
+        }
+    }
+
 
     inner class BoardViewHolder(val binding: ItemBoardBinding) : RecyclerView.ViewHolder(binding.root)
 

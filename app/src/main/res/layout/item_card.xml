@@ -37,6 +37,7 @@
                 android:layout_height="30dp"
                 android:id="@+id/dropdownMenu"
                 android:src="@drawable/dots"
+                app:tint="@color/black"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
                 android:layout_margin="15dp"
@@ -74,7 +75,8 @@
                 android:id="@+id/memberLayout"
                 android:layout_below="@id/card_iv"
                 android:layout_alignParentRight="true"
-                android:layout_margin="20dp"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginVertical="8dp"
                 >
 
                 <ImageView
@@ -133,9 +135,10 @@
                 android:id="@+id/btn_toggle"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_alignParentRight="true"
-                android:layout_below="@id/memberLayout"
-                android:layout_marginHorizontal="15dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="10dp"
+                android:layout_below="@id/card_iv"
+                app:tint="@color/black"
                 android:src="@drawable/baseline_arrow_drop_down_24"
                 android:text="Toggle" />
 
@@ -152,8 +155,9 @@
                 android:id="@+id/btn_add_list_at_end"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/btn_toggle"
-                android:layout_margin="15dp"
+                android:layout_marginTop="5dp"
+                android:layout_below="@id/memberLayout"
+                android:layout_marginHorizontal="15dp"
                 android:background="@drawable/dotted_border"
                 android:text="Add Subtask"
                 android:textColor="@color/secondary_text"
